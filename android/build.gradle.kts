@@ -1,7 +1,18 @@
+// طباعة مكان Gradle
 gradle.settingsEvaluated {
-      printIn("Gradle home: " + gradle.gradleUserHomeDir)
+    println("Gradle home: " + gradle.gradleUserHomeDir)
 }
-classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21"
+
+// استخدام buildscript لتحديد classpath
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
+    }
+}
 
 allprojects {
     repositories {
@@ -10,20 +21,17 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory =
-    rootProject.layout.buildDirectory
-        .dir("../../build")
-        .get()
+// تغيير مسار مجلد build الرئيسي
+val newBuildDir = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {
-    val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
+    val newSubprojectBuildDir = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
-}
-subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// مهمة تنظيف build
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
