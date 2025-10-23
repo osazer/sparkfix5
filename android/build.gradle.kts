@@ -1,24 +1,8 @@
-import org.gradle.api.tasks.Delete
-import org.gradle.kotlin.dsl.*
-
-// طباعة مسار Gradle بشكل صحيح
 gradle.settingsEvaluated {
-    println("Gradle home: ${gradle.gradleUserHomeDir}")
+      printIn("Gradle home: " + gradle.gradleUserHomeDir)
 }
+classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21"
 
-// buildscript بالشكل الصحيح
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
-        classpath("com.android.tools.build:gradle:8.11.1") // حط الإصدار المطلوب
-    }
-}
-
-// كل المشاريع repositories
 allprojects {
     repositories {
         google()
@@ -26,18 +10,20 @@ allprojects {
     }
 }
 
-// تغيير مسار build
-val newBuildDir = rootProject.layout.buildDirectory.dir("../../build").get()
-rootProject.layout.buildDirectory.set(newBuildDir)
+val newBuildDir: Directory =
+    rootProject.layout.buildDirectory
+        .dir("../../build")
+        .get()
+rootProject.layout.buildDirectory.value(newBuildDir)
 
-// لكل subprojects
 subprojects {
-    val newSubprojectBuildDir = newBuildDir.dir(project.name)
-    project.layout.buildDirectory.set(newSubprojectBuildDir)
-    evaluationDependsOn(":app")
+    val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
+    project.layout.buildDirectory.value(newSubprojectBuildDir)
+}
+subprojects {
+    project.evaluationDependsOn(":app")
 }
 
-// مهمة clean
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
